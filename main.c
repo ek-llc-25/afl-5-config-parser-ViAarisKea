@@ -5,5 +5,6 @@
 int main(void) {
     struct config_t *config = read_config("../config.ini");
     print_config(config);
+    free_config(config);
     return 0;
 }

@@ -52,7 +52,7 @@ struct config_t *read_config(char *filename) {
         // Efter `buf2` er allokeret og config-linjen er kopieret ind, skal
         // pointeren gemmes i vores datastruktur, så den ikke går tabt. Den
         // gemmes på plads `config->count` som er seneste ubrugte plads.
-        config->lines[config->count] = buf2; // brug setting_converter()
+        config->lines[config->count] = setting_converter(buf2); // brug setting_converter()
 
         // `count` forøges så næste config-linjes buffer gemmes på næste plads.
         config->count += 1;
@@ -73,22 +73,46 @@ struct setting_t *setting_converter(char *line) {
 
     // TODO: Find navnet på setting'en i *line
     // TODO: Find værdien på setting'en i *line
-
-    setting->name = NULL; // skal ændres
-    setting->value = NULL; // skal ændres
+    if (line == NULL) {
+        fprintf(stderr, "Could not parse line\n");
+        return NULL;
+    }
+    char *name_str = malloc(strlen(line) + 1);
+    char *value_str = malloc(strlen(line) + 1);
+    bool is_name = true;
+    for (int i = 0; line[i] != '\0'; i++) {
+        if (line[i] == '=') {
+            is_name = false;
+            continue;
+        }
+        if (line[i] == '\n') {
+            continue;
+        }
+        // printf("name length is %lu\n", strlen(name_str));
+        // printf("value length is %lu\n", strlen(value_str));
+        if (is_name) {
+            name_str[strlen(name_str)] = line[i];
+        } else {
+            value_str[strlen(value_str)] = line[i];
+        }
+    }
+    name_str[strlen(name_str)] = '\0';
+    value_str[strlen(value_str)] = '\0';
+    setting->name = name_str;
+    setting->value = value_str;
 
     // TODO: return den setting hvor felterne er sat
     return setting;
 }
 
 void print_setting(struct setting_t *setting) {
-    // TODO: Print en enkelt setting's name og value
+    printf("Name: %s\n", setting->name);
+    printf("Value: %s\n", setting->value);
 }
 
 void print_config(struct config_t *config) {
     for (int i = 0; i < config->count; i++) {
-        printf("Setting: %s", config->lines[i]);
-        // print_setting(config->lines[i]);
+        print_setting(config->lines[i]);
     }
 }
 
